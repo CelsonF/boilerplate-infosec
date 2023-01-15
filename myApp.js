@@ -5,16 +5,29 @@ const app = express();
 const actionFrameguard = { action: 'deny' };
 
 const timeInSeconds = 90 * 24 * 3600;
-const configHsts = { maxAge: timeInSeconds, force: true };
+const configHsts = {
+  maxAge: timeInSeconds,
+  force: true
+};
+
+const confSecurityPolicy = {
+  directives: {
+    defaultSrc: ["'self'"],
+    scriptSrc: ["'self'", 'trusted-cdn.com'],
+  }
+}
 
 module.exports = app;
-app.use(helmet.hidePoweredBy());
 app.use(helmet.frameguard(actionFrameguard));
+app.use(helmet.hsts(configHsts));
+app.use(helmet.hidePoweredBy());
 app.use(helmet.xssFilter());
 app.use(helmet.noSniff());
 app.use(helmet.ieNoOpen());
-app.use(helmet.hsts(configHsts));
 app.use(helmet.dnsPrefetchControl());
+app.use(helmet.noCache());
+app.use(helmet.contentSecurityPolicy(confSecurityPolicy));
+
 
 
 const api = require('./server.js');
